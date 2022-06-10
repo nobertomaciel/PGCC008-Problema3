@@ -1,4 +1,4 @@
-# PGCC008 - Sistemas Computacionais 2022-1 <br>Atividade #2: Detecção de Emergências (rede mesh)
+# PGCC008 - Sistemas Computacionais 2022-1 <br>Atividade #3: Detecção de Emergências (rede mesh)
 
 ## Descrição:
 <!-- ## Description: -->
