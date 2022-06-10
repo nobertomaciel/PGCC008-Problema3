@@ -48,3 +48,14 @@
       Tutorial para usar o ESP8266 na IDE Arduino <a href="https://github.com/angeload/pgcc008_2022-1_Probl1/blob/main/tutorials/nodeMcu_on_Arduino_IDE.md">aqui</a>
    </li>
 </ol>
+
+### Sites
+<ol>
+   <li>
+      <a href="https://www.instructables.com/Add-Custom-Alexa-Control-to-Raspberry-Pi-Project/">https://www.instructables.com/Add-Custom-Alexa-Control-to-Raspberry-Pi-Project/</a>
+   </li>
+
+   <li>
+      <a href="https://www.raspberrypi.com/software/operating-systems/">https://www.raspberrypi.com/software/operating-systems/</a>
+   </li>
+</ol>
