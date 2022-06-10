@@ -4,17 +4,17 @@
 <!-- ## Description: -->
 <ul>
    <li>
-      <a href="https://github.com/guaacoelho95/OPGCC008-Problema2/blob/main/job_description.pdf">job_description.pdf</a>
+      <a href="https://github.com/guaacoelho95/OPGCC008-Problema3/blob/main/job_description.pdf">job_description.pdf</a>
    </li>
 </ul>
 
 ## Diagramas do projeto:
 <!-- ## Project diagrams: -->
 <p>
-   <img src="https://github.com/guaacoelho95/OPGCC008-Problema2/blob/main/diagrams/PGCC008_Atividade-2_Diagrams-diagrama%20estrutural.drawio.png">
+   <img src="https://github.com/guaacoelho95/OPGCC008-Problema3/blob/main/diagrams/PGCC008_Atividade-3_Diagrams-diagrama%20estrutural.drawio.png">
 </p>
 <p>
-   <img width="960px" src="https://github.com/guaacoelho95/OPGCC008-Problema2/blob/main/diagrams/PGCC008_Atividade-2_Diagrams-diagrama%20f%C3%ADsico.drawio.png">
+   <img width="960px" src="https://github.com/guaacoelho95/OPGCC008-Problema3/blob/main/diagrams/PGCC008_Atividade-3_Diagrams-diagrama%20f%C3%ADsico.drawio.png">
 </p>
 
 
@@ -23,7 +23,7 @@
 <!-- ### Source codes -->
 <ul>
     <li>
-       <a href="https://github.com/guaacoelho95/OPGCC008-Problema2/tree/main/PGCC008%20endDevices">
+       <a href="https://github.com/guaacoelho95/OPGCC008-Problema3/tree/main/PGCC008%20endDevices">
          Código fonte genérico (para todos os endDevices da rede).
        </a>
    </li>
@@ -36,7 +36,7 @@
       Para desenvolver e carregar o código fonte no nodeMCU ESP8266 foi usado o Visual Studio Code com a extensão <a href="https://platformio.org/">PlatformIO</a>.
    </li>
     <li>      
-       Para usar o código na IDE do Arduino, utilize o arquivo <a href="https://github.com/guaacoelho95/OPGCC008-Problema2/blob/main/PGCC008%20endDevices/src/main.cpp">main.cpp</a> mudando a extensão para <b>.ino</b> e retirando a biblioteca <b>Arduino.h</b>.
+       Para usar o código na IDE do Arduino, utilize o arquivo <a href="https://github.com/guaacoelho95/OPGCC008-Problema3/blob/main/PGCC008%20endDevices/src/main.cpp">main.cpp</a> mudando a extensão para <b>.ino</b> e retirando a biblioteca <b>Arduino.h</b>.
    </li>
    <li>
       Você pode precisar instalar o driver ch340: <a href="https://github.com/angeload/pgcc008_2022-1_Probl1/tree/main/drivers">download aqui</a> (linux - testado em debian) ou <a href="https://github.com/angeload/pgcc008_2022-1_Probl1/blob/main/drivers/CH341SER_windows.zip">aqui</a> (windows).
@@ -46,5 +46,16 @@
    </li>
    <li>
       Tutorial para usar o ESP8266 na IDE Arduino <a href="https://github.com/angeload/pgcc008_2022-1_Probl1/blob/main/tutorials/nodeMcu_on_Arduino_IDE.md">aqui</a>
+   </li>
+</ol>
+
+### Sites
+<ol>
+   <li>
+      <a href="https://www.instructables.com/Add-Custom-Alexa-Control-to-Raspberry-Pi-Project/">https://www.instructables.com/Add-Custom-Alexa-Control-to-Raspberry-Pi-Project/</a>
+   </li>
+
+   <li>
+      <a href="https://www.raspberrypi.com/software/operating-systems/">https://www.raspberrypi.com/software/operating-systems/</a>
    </li>
 </ol>
