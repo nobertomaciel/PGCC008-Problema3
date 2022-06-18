@@ -11,10 +11,10 @@
 ## Diagramas do projeto:
 <!-- ## Project diagrams: -->
 <p>
-   <img src="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/diagrams/PGCC008_Atividade-2_Diagrams-diagrama%20estrutural.drawio.png">
+   <img src="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/diagrams/PGCC008_Atividade-3_Diagrams-diagrama%20estrutural.drawio.png">
 </p>
 <p>
-   <img width="960px" src="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/diagrams/PGCC008_Atividade-2_Diagrams-diagrama%20f%C3%ADsico.drawio.png">
+   <img width="960px" src="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/diagrams/PGCC008_Atividade-3_Diagrams-diagrama%20f%C3%ADsico.drawio.png">
 </p>
 
 
