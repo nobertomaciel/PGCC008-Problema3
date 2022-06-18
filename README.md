@@ -2,11 +2,15 @@
 
 ## Descrição:
 <!-- ## Description: -->
+Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de Pós-graduação Stricto Sensu em Ciência da Computação (mestrado) da Universidade Estadual de Feira de Santana.
 <ul>
    <li>
       <a href="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/job_description.pdf">job_description.pdf</a>
    </li>
 </ul>
+
+<p> Alunos: Noberto Maciel e Gustavo Coelho</p>
+<p> Professores: Ângelo Duarte e Thiago de Jesus</p>
 
 ## Diagramas do projeto:
 <!-- ## Project diagrams: -->
