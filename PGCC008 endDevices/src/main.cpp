@@ -1,3 +1,23 @@
+// Example: first Sink response message (nodeMaster re-send by broadcast)
+// {
+//     "device": sink[this], 
+//     "node_master" : id_node[define master],
+//     "send" : true, 
+//     "type" : 3
+// }
+
+// Example: message to nodeDestiny by Sink > nodeMaster
+// {
+//     "device": sink[this],
+//     "nodeDestiny" : id_node[N],
+//     "send" : true,
+//     "type" : 2,
+//     "t_send" : 30,
+//     "pinDef" [0,0,0,true,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+// }
+
+
+
 // Inclusão das bibliotecas
     #include <Arduino.h>
     #include <ArduinoJson.h>
@@ -127,9 +147,6 @@
 // this node id
     uint32_t nodeOrigin = 0;
 
-// node id to sendSingle
-    uint32_t nodeDestination = 0;
-
 // retorno do send single
     boolean returnSendSingle = false;
 
@@ -177,6 +194,7 @@
 
 // Define a tarefa de enviar mensagens e o tempo
     Task taskSendMessage( TASK_SECOND*T_send, TASK_FOREVER, &sendMessage );
+
 
 // ----------------------------------------------------------------------------
 // Functions
@@ -495,7 +513,7 @@ void sendMessage(){
                 if(sendType == 3){
                     mesh.sendBroadcast(meshExternalMsg);
                 }
-                else{
+                else if(sendType == 2){
                     returnSendSingle = mesh.sendSingle(nodeDestiny,meshExternalMsg);
                     if(returnSendSingle){
                         countTries = 0;
@@ -506,6 +524,9 @@ void sendMessage(){
                             countTries = 0;
                         }
                     }
+                }
+                else{
+                    Serial.printf("nodeMaster: no message sent............. sendType=%d\n",sendType);
                 }
                 meshSend = false;
                 sendType = 1;
@@ -564,7 +585,7 @@ void readSerial(){
         }
         else{
             meshExternalMsg = jsonRec;
-            Serial.println("Redirecting message from sink.........................");
+            Serial.println("Redirecting message from sink.................");
         }
     }
 }
