@@ -61,11 +61,13 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
    <li>
       <a href="https://www.instructables.com/Add-Custom-Alexa-Control-to-Raspberry-Pi-Project/">https://www.instructables.com/Add-Custom-Alexa-Control-to-Raspberry-Pi-Project/</a>
    </li>
-   <li>
+   
       <a href="https://www.raspberrypi.com/software/operating-systems/">https://www.raspberrypi.com/software/operating-systems/</a>
    </li>
    <li>
       <a href="https://docs.aws.amazon.com/pt_br/lambda/latest/dg/welcome.html">https://docs.aws.amazon.com/pt_br/lambda/latest/dg/welcome.html</a>
    </li>
-
+   <li>
+      <a href="https://developer.amazon.com/en-US/alexa/alexa-skills-kit#">https://developer.amazon.com/en-US/alexa/alexa-skills-kit#</a>
+   </li>
 </ol>
