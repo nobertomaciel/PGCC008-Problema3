@@ -26,7 +26,7 @@
 
 // Parâmetros da rede mesh
     #define   MESH_PREFIX       "pgcc008"
-    #define   MESH_PASSWORD     "atividade2"
+    #define   MESH_PASSWORD     "atividade"
     #define   MESH_PORT         5555
     #define   WIFI_TYPE         WIFI_AP_STA
     #define   WIFI_HIDE         1
@@ -40,8 +40,8 @@
 
 // dht11 config lib SimpleDHT
     int pinDHT11 = 2; //D4
-    int dhtPinDef = 3; // elemento 3 do array pinDef
-    int dhtMeasure = 4; // tipo de medida que o DHT deve retornar
+    int dht11PinDef = 3; // elemento 3 do array pinDef
+    int dht11Measure = 4; // tipo de medida que o DHT deve retornar
     SimpleDHT11 dht11(pinDHT11);
 
 // bmp280 config lib Adafruit_BMP280
@@ -241,11 +241,11 @@ bool getParameters(String toGet){
         if(receivedJsonData.containsKey("uvMeasure")){
             uvMeasure = receivedJsonData["uvMeasure"];
         }
-        if(receivedJsonData.containsKey("dhtPinDef")){
-            dhtPinDef = receivedJsonData["dhtPinDef"];
+        if(receivedJsonData.containsKey("dht11PinDef")){
+            dht11PinDef = receivedJsonData["dht11PinDef"];
         }
-        if(receivedJsonData.containsKey("dhtMeasure")){
-            dhtMeasure = receivedJsonData["dhtMeasure"];
+        if(receivedJsonData.containsKey("dht11Measure")){
+            dht11Measure = receivedJsonData["dht11Measure"];
         }
         if(receivedJsonData.containsKey("bmp280PinDef")){
             bmp280PinDef = receivedJsonData["bmp280PinDef"];
@@ -427,9 +427,9 @@ void readSensors(){
                 uvMeasure = 0;
             }
             else{
-                if(i == dhtPinDef){
-                    pinData[i] = readDht11(dhtMeasure);
-                    dhtMeasure = 4;
+                if(i == dht11PinDef){
+                    pinData[i] = readDht11(dht11Measure);
+                    dht11Measure = 4;
                 }
                 else if(i == bmp280PinDef){
                     pinData[i] = readBmp280(bmp280Measure);
