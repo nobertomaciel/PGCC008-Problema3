@@ -52,7 +52,7 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
       Tutorial para usar o ESP8266 na IDE Arduino <a href="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/tutorials/nodeMcu_on_Arduino_IDE.md">aqui</a>
    </li>
    <li>
-      Protocolo de comunicação entre sensores e pinagem na <a href="https://github.com/nobertomaciel/PGCC008-Problema3/issues/2">issue #2.</a>
+      Protocolo de comunicação entre sensores e pinagem na <a href="https://github.com/nobertomaciel/PGCC008-Problema3/issues/2">issue #2, issue #4.</a>
    </li>
 </ol>
 
