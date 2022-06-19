@@ -39,19 +39,19 @@
     #define BMP_CS   (10)
 
 // dht11 config lib SimpleDHT
-    int pinDHT11 = 2; //D4
-    int dht11PinDef = 3; // elemento 3 do array pinDef
-    int dht11Measure = 4; // tipo de medida que o DHT deve retornar
+    int pinDHT11 = 2;           //D4
+    int dht11PinDef = 3;        // elemento 3 do array pinDef
+    int dht11Measure = 4;       // tipo de medida que o sensor deve retornar
     SimpleDHT11 dht11(pinDHT11);
 
 // bmp280 config lib Adafruit_BMP280
-    int bmp280PinDef = 5; // D2
-    int bmp280Measure = 4;
+    int bmp280PinDef = 6;       // D1
+    int bmp280Measure = 4;      // tipo de medida que o sensor deve retornar
     Adafruit_BMP280 bmp280;
 
 // bmp180 config lib Adafruit_BMP085
-    int bmp180PinDef = 6; // D1
-    int bmp180Measure = 4;
+    int bmp180PinDef = 6;       // D1
+    int bmp180Measure = 4;      // tipo de medida que o sensor deve retornar
     Adafruit_BMP085 bmp180;
 
 // Flame sensor
