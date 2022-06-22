@@ -52,7 +52,13 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
       Tutorial para usar o ESP8266 na IDE Arduino <a href="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/tutorials/nodeMcu_on_Arduino_IDE.md">aqui</a>
    </li>
    <li>
-      Protocolo de comunicação entre sensores e pinagem na <a href="https://github.com/nobertomaciel/PGCC008-Problema3/issues/2">issue #2</a> e <a href="https://github.com/nobertomaciel/PGCC008-Problema3/issues/4">issue #4</a>
+      Sensores, pinos e funcionalidades: <a href="https://github.com/nobertomaciel/PGCC008-Problema3/issues/2">issue #2</a>
+   </li>
+   <li>
+      Protocolo de comunicação do projeto: <a href="https://github.com/nobertomaciel/PGCC008-Problema3/issues/4">issue #4</a>
+   </li>
+   <li>
+      Protocolo de comunicação da rede Mesh: <a href="https://github.com/arkhipenko/TaskScheduler/wiki/Full-Document">PainlessMesh Lib</a>
    </li>
 </ol>
 
@@ -69,5 +75,9 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
    </li>
    <li>
       <a href="https://developer.amazon.com/en-US/alexa/alexa-skills-kit#">https://developer.amazon.com/en-US/alexa/alexa-skills-kit#</a>
+   </li>
+   
+   <li>
+      <a href="https://gitlab.com/painlessMesh/painlessMesh">https://gitlab.com/painlessMesh/painlessMesh</a>
    </li>
 </ol>
