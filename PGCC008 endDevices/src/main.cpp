@@ -232,8 +232,49 @@ void pinEnable(){
     }
 }
 
+// reseta os dados enviados
+void resetJsonSensorKeysData(){
+    if(sendJsonData.containsKey("seaLevelAltitude")){
+        sendJsonData.remove("seaLevelAltitude");
+        Serial.println("sendJsonData[seaLevelAltitude] keys removed....................");
+    }
+    if(sendJsonData.containsKey("temperature")){
+        sendJsonData.remove("temperature");
+        Serial.println("sendJsonData[temperature] keys removed....................");
+    }
+    if(sendJsonData.containsKey("pressure")){
+        sendJsonData.remove("pressure");
+        Serial.println("sendJsonData[pressure] keys removed....................");
+    }
+    if(sendJsonData.containsKey("humidity")){
+        sendJsonData.remove("humidity");
+        Serial.println("sendJsonData[humidity] keys removed....................");
+    }
+    if(sendJsonData.containsKey("flame")){
+        sendJsonData.remove("flame");
+        Serial.println("sendJsonData[flame] keys removed....................");
+    }
+    if(sendJsonData.containsKey("uv")){
+        sendJsonData.remove("uv");
+        Serial.println("sendJsonData[uv] keys removed....................");
+    }
+    if(sendJsonData.containsKey("dht11_error")){
+        sendJsonData.remove("dht11_error");
+        Serial.println("sendJsonData[dht11_error] keys removed....................");
+    }
+    if(sendJsonData.containsKey("bmp180_error")){
+        sendJsonData.remove("bmp180_error");
+        Serial.println("sendJsonData[bmp180_error] keys removed....................");
+    }
+    if(sendJsonData.containsKey("bmp280_error")){
+        sendJsonData.remove("bmp280_error");
+        Serial.println("sendJsonData[bmp280_error] keys removed....................");
+    }
+}
+
 // testa se a chave json existe e atribui à respectiva variável global se o nó for destino
 bool getParameters(String toGet){
+    resetJsonSensorKeysData();
     DynamicJsonDocument doc(1024);
     deserializeJson(doc, toGet);
     JsonObject receivedJsonData = doc.as<JsonObject>();
@@ -467,14 +508,12 @@ float readBmp180(int measure = 4){
 bool readFlame(int pin){
     bool flame = digitalRead(pin);
     if(flame){
-        // verificar aqui e permitir o envio pela serial se o node for master
-        meshSend = false; // false or true????
+        // se detectou chama, envie mensagem imediatamente
         sendJsonData["flame"] = true;
         sendMessage();
     }
     return flame;
 }
-
 
 // Leitura de todos os sensores
 void readSensors(){
@@ -483,24 +522,19 @@ void readSensors(){
             uint8_t pin = pinDef[i].pinNum;
             if(i == uvPinDef){
                 pinData[i] = readUv(pin,uvMeasure);
-                //uvMeasure = 4;
             }
             else if(i == dht11PinDef){
                 pinData[i] = readDht11(dht11Measure);
-                //dht11Measure = 4;
             }
             else if(i == bmp280PinDef){
                 pinData[i] = readBmp280(bmp280Measure);
-                //bmp280Measure = 4;
             }
             else if(i == bmp180PinDef){
                 pinData[i] = readBmp180(bmp180Measure);
-                //bmp180Measure = 4;
             }
             else if(i == flamePinDef){
                 pinMode(pin, INPUT_PULLUP);
                 pinData[i] = readFlame(pin);
-                //flameMeasure = 4;
             }
             else{
                 pinData[i] = digitalRead(pin);
@@ -512,38 +546,6 @@ void readSensors(){
     }
 }
 
-
-// reseta os dados enviados
-void resetJsonSensorKeysData(){
-    if(sendJsonData.containsKey("seaLevelAltitude")){
-        sendJsonData.remove("seaLevelAltitude");
-    }
-    if(sendJsonData.containsKey("temperature")){
-        sendJsonData.remove("temperature");
-    }
-    if(sendJsonData.containsKey("pressure")){
-        sendJsonData.remove("pressure");
-    }
-    if(sendJsonData.containsKey("humidity")){
-        sendJsonData.remove("humidity");
-    }
-    if(sendJsonData.containsKey("flame")){
-        sendJsonData.remove("flame");
-    }
-    if(sendJsonData.containsKey("uv")){
-        sendJsonData.remove("uv");
-    }
-    if(sendJsonData.containsKey("dht11_error")){
-        sendJsonData.remove("dht11_error");
-    }
-    if(sendJsonData.containsKey("bmp180_error")){
-        sendJsonData.remove("bmp180_error");
-    }
-    if(sendJsonData.containsKey("bmp280_error")){
-        sendJsonData.remove("bmp280_error");
-    }
-    Serial.println("sendJsonData keys reseted....................");
-}
 
 // passagem dos dados para json
 void jsonParse(){
@@ -562,7 +564,6 @@ void jsonParse(){
         if(i<PINS_NUM-1){printPinDef += ", ";}
         if(i==PINS_NUM-1){printPinDef += " ]";}
     }
-    resetJsonSensorKeysData();
     readSensors();
     for(int i=0;i<PINS_NUM;++i){
         if(i==0){printPinData = "pinData: [ ";}
@@ -579,10 +580,7 @@ void sendMessage(){
     jsonParse();
     if(nodeOrigin == NODE_MASTER){
             if(meshSend){
-                if(sendType == 3){
-                    mesh.sendBroadcast(meshExternalMsg);
-                }
-                else if(sendType == 2){
+                if(sendType == 2){
                     returnSendSingle = mesh.sendSingle(nodeDestiny,meshExternalMsg);
                     if(returnSendSingle){
                         countTries = 0;
@@ -594,17 +592,18 @@ void sendMessage(){
                         }
                     }
                 }
+                else if(sendType == 3){
+                    mesh.sendBroadcast(meshExternalMsg);
+                }
                 else if(sendType == 4){
-                    //resetJsonSensorKeysData();
                     // enviar mensagem com os dados requisitados imediatamente pela serial
-                    Serial.printf("nodeMaster instant message here (sendType=%d)...........................\n",sendType);
-                    Serial.printf("nodeMaster instant message here (sendType=%d)...........................\n",sendType);
+                    Serial.printf("nodeMaster INSTANT message here (sendType=%d)...........................\n",sendType);
                 }
                 else{
-                    Serial.printf("nodeMaster: no message sent (sendType=%d)...........................\n",sendType);
+                    Serial.printf("nodeMaster: NO message sent (sendType=%d)...........................\n",sendType);
                 }
-                meshSend = false;
-                sendType = 1;
+                meshSend = false; // por default, o node master não envia mensagens por mesh. Só envia quando é requisitado {"send":true}
+                sendType = 2;
                 nodeDestiny = NODE_MASTER;
             }
             else{
@@ -619,8 +618,7 @@ void sendMessage(){
                 Serial.println("endDevice instant message singleMessage() sent................");
                 T_send = Old_T_send;
                 sendTimeAdjust();
-                //resetJsonSensorKeysData();
-                sendType = 1;
+                sendType = 2;
             }
         }
     }
