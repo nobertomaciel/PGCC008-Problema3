@@ -52,11 +52,18 @@
     #define   WIFI_HIDE         1
     #define   WIFI_CHANNEL      1
 
+// verificar
+// verificar
+// verificar
 // bmp280 config lib Adafruit_BMP280
-    #define BMP_SCK  (13)
-    #define BMP_MISO (12)
-    #define BMP_MOSI (11)
-    #define BMP_CS   (10)
+    #define BMP_SCK  (13) // verificar
+    #define BMP_MISO (12) // verificar
+    #define BMP_MOSI (11) // verificar
+    #define BMP_CS   (10) // verificar
+// verificar
+// verificar
+// verificar
+
 
 // dht11 config lib SimpleDHT
     int pinDHT11 = 2;           //D4
@@ -76,9 +83,11 @@
 
 // Flame sensor
     int flamePinDef = 15;
+    int flameMeasure = 4;
 
 // UV sensor
-    int uvMeasure = 0;
+    int uvPinDef = 0;
+    int uvMeasure = 4;
 
 // define os pinos             pin | array |real pin 
     #define   ANALOG            A0  // 0    A0
@@ -207,7 +216,7 @@ void timestampAdjust(int t){
 }
 
 // atualiza o tempo de envio das mensagens
-void sendTimeAdjust(){    
+void sendTimeAdjust(){
     taskSendMessage.setInterval(TASK_SECOND*T_send);
     taskSendMessage.enable();
     Serial.printf("sendTimeAdjust:........................................... %d\n",T_send);
@@ -256,6 +265,12 @@ bool getParameters(String toGet){
                 pinEnable();
             }
         }
+        if(receivedJsonData.containsKey("currentPressure")){
+            currentPressure = receivedJsonData["currentPressure"];
+        }
+        if(receivedJsonData.containsKey("uvPinDef")){
+            uvPinDef = receivedJsonData["uvPinDef"];
+        }
         if(receivedJsonData.containsKey("uvMeasure")){
             uvMeasure = receivedJsonData["uvMeasure"];
         }
@@ -279,6 +294,9 @@ bool getParameters(String toGet){
         }
         if(receivedJsonData.containsKey("flamePinDef")){
             flamePinDef = receivedJsonData["flamePinDef"];
+        }
+        if(receivedJsonData.containsKey("flameMeasure")){
+            flameMeasure = receivedJsonData["flameMeasure"];
         }
         if(receivedJsonData.containsKey("node_master")){
             uint32_t node_master = receivedJsonData["node_master"];
@@ -341,6 +359,15 @@ void meshInit(){
     nodeOrigin = mesh.getNodeId();
 }
 
+// leitura do sensor UV
+float readUv(int pin,int measure = 4){
+    float a = analogRead(pin);
+    if(measure == 4){
+        sendJsonData["uv"] = a;
+    }
+    return a;
+}
+
 // Leitura do dht11
 float readDht11(int measure = 4){
     float temperature = 0;
@@ -348,18 +375,21 @@ float readDht11(int measure = 4){
     unsigned char data[40] = {0};
     int err = SimpleDHTErrSuccess;
     if ((err = dht11.read2(&temperature, &humidity, data)) != SimpleDHTErrSuccess) {
+        sendJsonData["dht11_error"] = err;
         return 0;
     }
     if(measure == 1){
+        sendJsonData["temperature"] = temperature;
         return temperature;
     }
     else if(measure == 2){
+        sendJsonData["humidity"] = humidity;
         return humidity;
     }
     else if(measure == 4){
         sendJsonData["temperature"] = temperature;
         sendJsonData["humidity"] = humidity;
-        return 0;
+        return -1;
     }
     else{
         return -1;
@@ -369,49 +399,66 @@ float readDht11(int measure = 4){
 // Leitura do bmp280
 float readBmp280(int measure = 4){
     if (bmp280.takeForcedMeasurement()) {
+        float temperature = bmp280.readTemperature();
+        float pressure = bmp280.readPressure();
+        float altitude = bmp280.readAltitude(currentPressure);
         if(measure == 1){
-            return bmp280.readTemperature();
+            sendJsonData["temperature"] = temperature;
+            return temperature;
         }
         else if(measure == 2){
-            return bmp280.readPressure();
+            sendJsonData["pressure"] = pressure;
+            return pressure;
         }
         else if(measure == 3){
-            return bmp280.readAltitude(currentPressure);
+            sendJsonData["altitude"] = altitude;
+            return altitude;
         }
         else if(measure == 4){
-            sendJsonData["temperature"] = bmp280.readTemperature();
-            sendJsonData["pressure"] = bmp280.readPressure();
-            return 0;
+            sendJsonData["temperature"] = temperature;
+            sendJsonData["pressure"] = pressure;
+            return -1;
         }
         else{
+            sendJsonData["bmp280_error"] = "no measure selected";
             return -1;
         }
     }
     else{
+        sendJsonData["bmp280_error"] = "fail reading sensor";
         return -1;
     }
 }
 
 // Leitura do bmp180
 float readBmp180(int measure = 4){
+    float temperature = bmp180.readTemperature();
+    float pressure = bmp180.readPressure();
+    float altitude = bmp180.readAltitude(currentPressure);
+    float seaLevelAltitude = bmp180.readSealevelPressure();
     if(measure == 1){
-        return bmp180.readTemperature();
+        sendJsonData["temperature"] = temperature;
+        return temperature;
     }
     else if(measure == 2){
-        return bmp180.readPressure();
+        sendJsonData["pressure"] = pressure;
+        return pressure;
     }
     else if(measure == 3){
-        return bmp180.readAltitude(currentPressure);
-    }
-    else if(measure == 5){
-        return bmp180.readSealevelPressure();
+        sendJsonData["altitude"] = altitude;
+        return altitude;
     }
     else if(measure == 4){
-        sendJsonData["temperature"] = bmp180.readTemperature();
-        sendJsonData["pressure"] = bmp180.readPressure();
-        return 0;
+        sendJsonData["temperature"] = temperature;
+        sendJsonData["pressure"] = pressure;
+        return -1;
+    }
+    else if(measure == 5){
+        sendJsonData["seaLevelAltitude"] = seaLevelAltitude;
+        return seaLevelAltitude;
     }
     else{
+        sendJsonData["bmp180_error"] = "no measure selected";
         return -1;
     }
 }
@@ -420,50 +467,43 @@ float readBmp180(int measure = 4){
 bool readFlame(int pin){
     bool flame = digitalRead(pin);
     if(flame){
-        meshSend = false;
+        // verificar aqui e permitir o envio pela serial se o node for master
+        meshSend = false; // false or true????
         sendJsonData["flame"] = true;
         sendMessage();
     }
     return flame;
 }
 
-float readUv(int pin,int measure = 0){
-    float a = analogRead(pin);
-    if(measure == 1){
-        sendJsonData["uv"] = a;
-    }
-    return a;
-}
 
 // Leitura de todos os sensores
 void readSensors(){
     for(int i = 0;i < PINS_NUM-1;++i){
       if(pinDef[i].pinSet == true){
             uint8_t pin = pinDef[i].pinNum;
-            if(i == 0){
+            if(i == uvPinDef){
                 pinData[i] = readUv(pin,uvMeasure);
-                uvMeasure = 0;
+                uvMeasure = 4;
+            }
+            else if(i == dht11PinDef){
+                pinData[i] = readDht11(dht11Measure);
+                dht11Measure = 4;
+            }
+            else if(i == bmp280PinDef){
+                pinData[i] = readBmp280(bmp280Measure);
+                bmp280Measure = 4;
+            }
+            else if(i == bmp180PinDef){
+                pinData[i] = readBmp180(bmp180Measure);
+                bmp180Measure = 4;
+            }
+            else if(i == flamePinDef){
+                pinMode(pin, INPUT_PULLUP);
+                pinData[i] = readFlame(pin);
+                flameMeasure = 4;
             }
             else{
-                if(i == dht11PinDef){
-                    pinData[i] = readDht11(dht11Measure);
-                    dht11Measure = 4;
-                }
-                else if(i == bmp280PinDef){
-                    pinData[i] = readBmp280(bmp280Measure);
-                    bmp280Measure = 4;
-                }
-                else if(i == bmp180PinDef){
-                    pinData[i] = readBmp180(bmp180Measure);
-                    bmp180Measure = 4;
-                }
-                else if(i == flamePinDef){
-                    pinMode(pin, INPUT_PULLUP);
-                    pinData[i] = readFlame(pin);
-                }
-                else{
-                    pinData[i] = digitalRead(pin);
-                }
+                pinData[i] = digitalRead(pin);
             }
       }
       else{
@@ -481,28 +521,35 @@ void jsonParse(){
     sendJsonData["timestamp"] = timestamp+((millis()-adjusterTime)/1000); // DateTime.now(); // 
     sendJsonData["latitude"] = latitude;
     sendJsonData["longitude"] = longitude;
+    String printPinDef;
+    String printPinData;
     for(int i=0;i<PINS_NUM;++i){
-        sendJsonData["pinDef"][i] = pinDef[i].pinSet;
+        if(i==0){printPinDef = "pinDef: [ ";}
+        printPinDef += pinDef[i].pinSet;
+        if(i<PINS_NUM-1){printPinDef += ", ";}
+        if(i==PINS_NUM-1){printPinDef += " ]";}
     }
     readSensors();
-    for(int i=0;i<PINS_NUM-1;++i){
-        if(pinDef[i].pinSet == true){
-            sendJsonData["data"][i] = pinData[i];
-        }
-        else{
-            sendJsonData["data"][i] = 0;
-        }
-    }    
+    for(int i=0;i<PINS_NUM;++i){
+        if(i==0){printPinData = "pinData: [ ";}
+        printPinData += pinData[i];
+        if(i<PINS_NUM-1){printPinData += ", ";}
+        if(i==PINS_NUM-1){printPinData += " ]";}
+    }
     serializeJson(sendJsonData, meshMsg);
 }
 
 // reseta os dados enviados
 void resetJsonData(){
+    sendJsonData.remove("seaLevelAltitude");
     sendJsonData.remove("temperature");
     sendJsonData.remove("pressure");
     sendJsonData.remove("humidity");
     sendJsonData.remove("flame");
     sendJsonData.remove("uv");
+    sendJsonData.remove("dht11_error");
+    sendJsonData.remove("bmp180_error");
+    sendJsonData.remove("bmp280_error");
 }
 
 // Função de envio de mensagens
@@ -541,13 +588,14 @@ void sendMessage(){
         if(strlen(meshMsg) > 0){
             mesh.sendSingle(NODE_MASTER, meshMsg);
             if(sendType == 4){
+                Serial.println("endDevice: singleMessage sent................");
                 T_send = Old_T_send;
                 sendTimeAdjust();
-                resetJsonData();
                 sendType = 1;
             }
         }
     }
+    resetJsonData();
 }
 
 // envia as mensagens recebidas e formuladas para a serial (Sink) - apenas para node master
@@ -592,7 +640,7 @@ void readSerial(){
 
 // configura o bmp280
 void bmp280Config(){
-    bmp280.begin();
+    bmp280.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID);
     bmp280.setSampling( Adafruit_BMP280::MODE_FORCED, /* Operating Mode. */
                     Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                     Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
