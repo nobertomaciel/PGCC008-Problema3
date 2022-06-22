@@ -483,24 +483,24 @@ void readSensors(){
             uint8_t pin = pinDef[i].pinNum;
             if(i == uvPinDef){
                 pinData[i] = readUv(pin,uvMeasure);
-                uvMeasure = 4;
+                //uvMeasure = 4;
             }
             else if(i == dht11PinDef){
                 pinData[i] = readDht11(dht11Measure);
-                dht11Measure = 4;
+                //dht11Measure = 4;
             }
             else if(i == bmp280PinDef){
                 pinData[i] = readBmp280(bmp280Measure);
-                bmp280Measure = 4;
+                //bmp280Measure = 4;
             }
             else if(i == bmp180PinDef){
                 pinData[i] = readBmp180(bmp180Measure);
-                bmp180Measure = 4;
+                //bmp180Measure = 4;
             }
             else if(i == flamePinDef){
                 pinMode(pin, INPUT_PULLUP);
                 pinData[i] = readFlame(pin);
-                flameMeasure = 4;
+                //flameMeasure = 4;
             }
             else{
                 pinData[i] = digitalRead(pin);
@@ -510,6 +510,39 @@ void readSensors(){
             pinData[i] = 0;
       }
     }
+}
+
+
+// reseta os dados enviados
+void resetJsonSensorKeysData(){
+    if(sendJsonData.containsKey("seaLevelAltitude")){
+        sendJsonData.remove("seaLevelAltitude");
+    }
+    if(sendJsonData.containsKey("temperature")){
+        sendJsonData.remove("temperature");
+    }
+    if(sendJsonData.containsKey("pressure")){
+        sendJsonData.remove("pressure");
+    }
+    if(sendJsonData.containsKey("humidity")){
+        sendJsonData.remove("humidity");
+    }
+    if(sendJsonData.containsKey("flame")){
+        sendJsonData.remove("flame");
+    }
+    if(sendJsonData.containsKey("uv")){
+        sendJsonData.remove("uv");
+    }
+    if(sendJsonData.containsKey("dht11_error")){
+        sendJsonData.remove("dht11_error");
+    }
+    if(sendJsonData.containsKey("bmp180_error")){
+        sendJsonData.remove("bmp180_error");
+    }
+    if(sendJsonData.containsKey("bmp280_error")){
+        sendJsonData.remove("bmp280_error");
+    }
+    Serial.println("sendJsonData keys reseted....................");
 }
 
 // passagem dos dados para json
@@ -529,6 +562,7 @@ void jsonParse(){
         if(i<PINS_NUM-1){printPinDef += ", ";}
         if(i==PINS_NUM-1){printPinDef += " ]";}
     }
+    resetJsonSensorKeysData();
     readSensors();
     for(int i=0;i<PINS_NUM;++i){
         if(i==0){printPinData = "pinData: [ ";}
@@ -539,18 +573,6 @@ void jsonParse(){
     serializeJson(sendJsonData, meshMsg);
 }
 
-// reseta os dados enviados
-void resetJsonData(){
-    sendJsonData.remove("seaLevelAltitude");
-    sendJsonData.remove("temperature");
-    sendJsonData.remove("pressure");
-    sendJsonData.remove("humidity");
-    sendJsonData.remove("flame");
-    sendJsonData.remove("uv");
-    sendJsonData.remove("dht11_error");
-    sendJsonData.remove("bmp180_error");
-    sendJsonData.remove("bmp280_error");
-}
 
 // Função de envio de mensagens
 void sendMessage(){
@@ -572,8 +594,14 @@ void sendMessage(){
                         }
                     }
                 }
+                else if(sendType == 4){
+                    //resetJsonSensorKeysData();
+                    // enviar mensagem com os dados requisitados imediatamente pela serial
+                    Serial.printf("nodeMaster instant message here (sendType=%d)...........................\n",sendType);
+                    Serial.printf("nodeMaster instant message here (sendType=%d)...........................\n",sendType);
+                }
                 else{
-                    Serial.printf("nodeMaster: no message sent............. sendType=%d\n",sendType);
+                    Serial.printf("nodeMaster: no message sent (sendType=%d)...........................\n",sendType);
                 }
                 meshSend = false;
                 sendType = 1;
@@ -588,14 +616,14 @@ void sendMessage(){
         if(strlen(meshMsg) > 0){
             mesh.sendSingle(NODE_MASTER, meshMsg);
             if(sendType == 4){
-                Serial.println("endDevice: singleMessage sent................");
+                Serial.println("endDevice instant message singleMessage() sent................");
                 T_send = Old_T_send;
                 sendTimeAdjust();
+                //resetJsonSensorKeysData();
                 sendType = 1;
             }
         }
     }
-    resetJsonData();
 }
 
 // envia as mensagens recebidas e formuladas para a serial (Sink) - apenas para node master
