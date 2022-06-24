@@ -81,7 +81,7 @@ def send_setup_signal(data_in, connection):
     data["send"] = True
     data["send_type"] = 3
     data["timestamp"] = timestamp
-    data = data.dumps(data)
+    data = json.dumps(data)
     connection.write(data.encode('ascii'))
     connection.flush()
     time.sleep(0.5)
@@ -105,7 +105,6 @@ def send_setup_signal(data_in, connection):
     return pin_table
 
 def changeFrequency(id, frequence, connection):
-
     period = 5 # período para que os sensores enviem os dados, em segundos
     data = {}
     data["node_master"] = "id"
@@ -122,72 +121,81 @@ def changeFrequency(id, frequence, connection):
     return
 
 def verifica_anomalia(data):
-
-    temperatura = data["temperature"]
-    chama = data["flame"]
-    uv = data["uv"]
-
-    # Se ocorrer muito alta radiação devo considerar como alta radiação tambem ou serão excludentes?
-
-    if uv is None or uv <= 5:
-        database["alta_rad"].append(0)
-        database["mto_alta_rad"].append(0)
-    else: #nesse else o uv ja é maior que 5
-        if uv > 7:
-            database["mto_alta_rad"].append(1)
+    r = False
+    if "flame" in data:
+        chama = data["flame"]
+        r = True
+    
+    if "uv" in data:    
+        uv = data["uv"]
+        r = True
+        # Se ocorrer muito alta radiação devo considerar como alta radiação tambem ou serão excludentes?
+        if uv is None or uv <= 5:
             database["alta_rad"].append(0)
-        else:
-            database["alta_rad"].append(1)
             database["mto_alta_rad"].append(0)
-
-    if temperatura is None or temperatura <= 35:
-        if chama:
-            database["prin_incendio"].append(1)
-        else: database["prin_incendio"].append(0)
-        database["calor"].append(0)
-        database["susp_incendio"].append(0)
-        database["incendio"].append(0)
-    else: # nesse else a temperatura ja é maior que 35
-        if temperatura > 45: 
-            if chama:
-                print("Incêndio")
-                database["calor"].append(0)
-                database["susp_incendio"].append(0)
-                database["incendio"].append(1)
-                database["prin_incendio"].append(0)
+        else: #nesse else o uv ja é maior que 5
+            if uv > 7:
+                database["mto_alta_rad"].append(1)
+                database["alta_rad"].append(0)
             else:
-                print("Suspeita de incêndio")
-                database["calor"].append(0)
-                database["susp_incendio"].append(1)
-                database["incendio"].append(0)
-                database["prin_incendio"].append(0)
-        else:
+                database["alta_rad"].append(1)
+                database["mto_alta_rad"].append(0)
+
+
+    if "temperature" in data:
+        temperatura = data["temperature"]
+        r = True
+        if temperatura is None or temperatura <= 35:
             if chama:
                 database["prin_incendio"].append(1)
-            else: 
-                database["prin_incendio"].append(0) 
-            print("onda de calor")
-            database["calor"].append(1)
+            else: database["prin_incendio"].append(0)
+            database["calor"].append(0)
             database["susp_incendio"].append(0)
             database["incendio"].append(0)
+        else: # nesse else a temperatura ja é maior que 35
+            if temperatura > 45: 
+                if chama:
+                    print("Incêndio")
+                    database["calor"].append(0)
+                    database["susp_incendio"].append(0)
+                    database["incendio"].append(1)
+                    database["prin_incendio"].append(0)
+                else:
+                    print("Suspeita de incêndio")
+                    database["calor"].append(0)
+                    database["susp_incendio"].append(1)
+                    database["incendio"].append(0)
+                    database["prin_incendio"].append(0)
+            else:
+                if chama:
+                    database["prin_incendio"].append(1)
+                else: 
+                    database["prin_incendio"].append(0) 
+                print("onda de calor")
+                database["calor"].append(1)
+                database["susp_incendio"].append(0)
+                database["incendio"].append(0)
                        
-    return
+    return r
 
 def leitura_dados(data):
-
-    database["id"].append(data["device"])
-    database["timestamp"].append(data["timestamp"])
-    database["latitude"].append(data["latitude"])
-    database["longitude"].append(data["longitude"])
+    if "device" in data:
+        database["id"].append(data["device"])
+    if "timestamp" in data:
+        database["timestamp"].append(data["timestamp"])
+    if "latitude" in data:
+        database["latitude"].append(data["latitude"])
+    if "longitude" in data:
+        database["longitude"].append(data["longitude"])
     
-    sensors = ['temperature', 'humidity', 'flame', 'uv', 'pression']
-    for s in sensors:
-        if s in data.keys():
-            database[s].append(data[s])
-        else: 
-            database[s].append(None)
-    verifica_anomalia(data)
-    print(database)
+    if(verifica_anomalia(data)):
+        sensors = ['temperature', 'humidity', 'flame', 'uv', 'pression']
+        for s in sensors:
+            if s in data.keys():
+                database[s].append(data[s])
+            else: 
+                database[s].append(None)    
+        print(database)
     return
 
 
@@ -197,16 +205,36 @@ def leitura_dados(data):
 database = {"id":[], "timestamp": [], "latitude":[], "longitude":[], "uv": [], "temperature": [], "flame": [], "humidity": [], "pression": [],
         "datahora":[], "alta_rad":[], "mto_alta_rad":[], "calor":[], "susp_incendio":[], "prin_incendio":[], "incendio":[]}
 
-connection = serial.Serial(port="/dev/ttyUSB0", baudrate=115200)
+connection = serial.Serial(port="/dev/ttyUSB0", baudrate=115200,bytesize=8, timeout=2, stopbits=serial.STOPBITS_ONE)
 connection.reset_input_buffer()
 
 while(True):
+    if(connection.in_waiting > 0):
+        msg = connection.readline()
+        print(msg.decode('Ascii'))
+        try:
+            data = json.loads(msg)
+            if "id_node" in  data.keys():
+                pin = send_setup_signal(data, connection)
+            else:
+                leitura_dados(data)
+        except:
+            print("JSON String inválida.....................")
 
-        msg = connection.readline().decode("utf-8")
-        data = json.loads(msg)
-        print(data)
-        if "id_node" in  data.keys():
-            pin = send_setup_signal(data, connection)
-        else:
-            leitura_dados(data)
+
+# while(True):
+#         msg = connection.readline().decode("utf-8")
+#         data = json.loads(msg)
+#         print(data)
+#         if "id_node" in  data.keys():
+#             pin = send_setup_signal(data, connection)
+#         else:
+#             leitura_dados(data)
+
+
+
+# while(True):
+#     if(connection.in_waiting > 0):
+#         serialString = connection.readline()
+#         print(serialString.decode('Ascii'))
 
