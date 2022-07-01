@@ -81,8 +81,10 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
    <li>
       <a href="https://developer.amazon.com/en-US/alexa/alexa-skills-kit#">https://developer.amazon.com/en-US/alexa/alexa-skills-kit#</a>
    </li>
-   
    <li>
       <a href="https://gitlab.com/painlessMesh/painlessMesh">https://gitlab.com/painlessMesh/painlessMesh</a>
+   </li>
+   <li>
+      <a href="https://www.waveshare.com/wiki/Flame_Sensor">https://www.waveshare.com/wiki/Flame_Sensor</a>
    </li>
 </ol>
