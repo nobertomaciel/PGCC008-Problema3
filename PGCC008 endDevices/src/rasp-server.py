@@ -5,9 +5,14 @@ import pickle
 import numpy as np
 import json
 import serial
+import httplib
+import urllib
+import time
 
 import time
 from datetime import datetime
+
+key = "PJB7IQ5N1GN98PET"
 
 pin_dht11 = 3
 pin_bmp180 = 6
@@ -198,6 +203,18 @@ def leitura_dados(data):
         print(database)
     return
 
+def enviaDadosThingSpeak():
+        params = urllib.urlencode({'field1': sensorData, 'key':key }) 
+        headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
+        conn = httplib.HTTPConnection("api.thingspeak.com:80")
+        try:
+            conn.request("POST", "/update", params, headers)
+            response = conn.getresponse()
+            print(response.status, response.reason)
+            data = response.read()
+            conn.close()
+        except:
+            print("connection failed\n")
 
 
 # Dicionário de dados contendo todas as informações recebidas pelo Rasp, desde os valores dos sensores (None caso não estejam presentes no pacote),
