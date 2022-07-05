@@ -82,27 +82,33 @@ def send_setup_signal(data_in, connection):
     data = {}
     data["node_master"] = data_in["id_node"]
     data["send"] = True
-    data["send_type"] = 3
-    data["timestamp"] = timestamp
+    data["type"] = 3
+    data["t_send"] = 5
     data = json.dumps(data)
+    print(data)
     connection.write(data.encode('ascii'))
     connection.flush()
     time.sleep(0.5)
-    print(data)
-    for n in node_list:
-        data = {}
-        data["nodeDestiny"] = n
-        data["node_master"] = data_in["id_node"]
-        data["t_send"] = 4
-        data["send"] = True
-        data["send_type"] = 3
-        data["timestamp"] = timestamp
-        data["pinDef"] = pin_table[n]
-        data=json.dumps(data)
-        print(data)
-        connection.write(data.encode('ascii'))
-        connection.flush()
-        time.sleep(0.5)
+
+    data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":5,"uvPinDef":0,"bmp280PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
+    connection.write(data.encode('ascii'))
+    connection.flush()
+    time.sleep(0.5)
+
+    data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":5,"dht11PinDef":3,"flamePinDef":15,"pinDef": [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
+    connection.write(data.encode('ascii'))
+    connection.flush()
+    time.sleep(0.5)
+
+    data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":5,"uvPinDef":0,"dht11PinDef":3,"flamePinDef":15,"pinDef": [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
+    connection.write(data.encode('ascii'))
+    connection.flush()
+    time.sleep(0.5)
+
+    data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":5,"uvPinDef":0,"bmp180PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
+    connection.write(data.encode('ascii'))
+    connection.flush()
+    time.sleep(0.5)
 
     # print(data)
     return pin_table
