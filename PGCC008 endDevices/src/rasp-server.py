@@ -180,7 +180,7 @@ def verifica_anomalia(data):
                 database["calor"].append(1)
                 database["susp_incendio"].append(0)
                 database["incendio"].append(0)
-                       
+         
     return r
 
 def leitura_dados(data):
@@ -194,17 +194,22 @@ def leitura_dados(data):
         database["longitude"].append(data["longitude"])
     
     if(verifica_anomalia(data)):
-        sensors = ['temperature', 'humidity', 'flame', 'uv', 'pression']
+        sensorData = []
+        sensors = ['temperature', 'humidity', 'flame', 'uv', 'pressure']
         for s in sensors:
             if s in data.keys():
                 database[s].append(data[s])
-            else: 
-                database[s].append(None)    
+                sensorData.append(data[s])
+            else:
+                database[s].append(None)
+                sensorData.append(None)
         print(database)
+        enviaDadosThingSpeak(sensorData)
     return
 
-def enviaDadosThingSpeak():
-        params = urllib.urlencode({'field1': sensorData, 'key':key }) 
+def enviaDadosThingSpeak(sensorData):
+        json = {'field1': sensorData[0],'field2': sensorData[1],'field3': sensorData[2],'field4': sensorData[3],'field5': sensorData[4], 'key':key }
+        params = urllib.urlencode(json)
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
         conn = httplib.HTTPConnection("api.thingspeak.com:80")
         try:
@@ -214,12 +219,12 @@ def enviaDadosThingSpeak():
             data = response.read()
             conn.close()
         except:
-            print("connection failed\n")
+            print("connection ThingSpeak failed\n")
 
 
 # Dicionário de dados contendo todas as informações recebidas pelo Rasp, desde os valores dos sensores (None caso não estejam presentes no pacote),
 # até a indnicação de ocorrência ou não de anomalias como incendios, alta radiação, onda de calor, entre outros
-database = {"id":[], "timestamp": [], "latitude":[], "longitude":[], "uv": [], "temperature": [], "flame": [], "humidity": [], "pression": [],
+database = {"id":[], "timestamp": [], "latitude":[], "longitude":[], "uv": [], "temperature": [], "flame": [], "humidity": [], "pressure": [],
         "datahora":[], "alta_rad":[], "mto_alta_rad":[], "calor":[], "susp_incendio":[], "prin_incendio":[], "incendio":[]}
 
 connection = serial.Serial(port="/dev/ttyUSB0", baudrate=115200,bytesize=8, timeout=2, stopbits=serial.STOPBITS_ONE)
@@ -237,21 +242,3 @@ while(True):
                 leitura_dados(data)
         except:
             print("JSON String inválida.....................")
-
-
-# while(True):
-#         msg = connection.readline().decode("utf-8")
-#         data = json.loads(msg)
-#         print(data)
-#         if "id_node" in  data.keys():
-#             pin = send_setup_signal(data, connection)
-#         else:
-#             leitura_dados(data)
-
-
-
-# while(True):
-#     if(connection.in_waiting > 0):
-#         serialString = connection.readline()
-#         print(serialString.decode('Ascii'))
-
