@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 import socket
 import pickle
 import numpy as np
 import json
 import serial
-import httplib
+import http.client
 import urllib
 import time
 
@@ -184,14 +182,21 @@ def verifica_anomalia(data):
     return r
 
 def leitura_dados(data):
+    print('aqui')
     if "device" in data:
+        print('aqui1')
         database["id"].append(data["device"])
     if "timestamp" in data:
+        print('aqui2')
         database["timestamp"].append(data["timestamp"])
     if "latitude" in data:
+        print('aqui3')
         database["latitude"].append(data["latitude"])
     if "longitude" in data:
+        print('aqui4')
         database["longitude"].append(data["longitude"])
+    
+    print('aqui5')
     
     if(verifica_anomalia(data)):
         sensorData = []
@@ -211,7 +216,7 @@ def enviaDadosThingSpeak(sensorData):
         json = {'field1': sensorData[0],'field2': sensorData[1],'field3': sensorData[2],'field4': sensorData[3],'field5': sensorData[4], 'key':key }
         params = urllib.urlencode(json)
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
-        conn = httplib.HTTPConnection("api.thingspeak.com:80")
+        conn = http.client.HTTPConnection("api.thingspeak.com:80")
         try:
             conn.request("POST", "/update", params, headers)
             response = conn.getresponse()
@@ -235,6 +240,8 @@ while(True):
         msg = connection.readline()
         print(msg.decode('Ascii'))
         try:
+            print('aqui0')
+            print(msg)
             data = json.loads(msg)
             if "id_node" in  data.keys():
                 pin = send_setup_signal(data, connection)
