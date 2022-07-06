@@ -18,7 +18,7 @@ pin_bmp280 = 5
 pin_uv = 0
 pin_chama = 1
 
-t_send = 5
+t_send = 10
 
 n_nodes = 4
 node_list = [4208803281, 4208793911, 4208790561, 4208779354]
@@ -118,10 +118,10 @@ def verifica_anomalia(data):
     r = False
     chama = False
     if "flame" in data:
-        chama = data["flame"]
+        chama =  data["flame"]
         r = True
     
-    if "uv" in data:    
+    if "uv" in data:
         uv = data["uv"]
         r = True
         # Se ocorrer muito alta radiação devo considerar como alta radiação tambem ou serão excludentes?
@@ -184,21 +184,23 @@ def leitura_dados(data):
         database["longitude"].append(data["longitude"])
 
     
-    if(verifica_anomalia(data)):
-        sensorData = []
-        sensors = ['temperature', 'humidity', 'flame', 'uv', 'pressure']
-        for s in sensors:
-            if s in data.keys():
-                database[s].append(data[s])
-                sensorData.append(data[s])
-            else:
-                database[s].append(None)
-                sensorData.append(0)
-        enviaDadosThingSpeak(sensorData)
+    # if(verifica_anomalia(data)):
+    verifica_anomalia(data)
+    sensorData = []
+    sensors = ['temperature', 'humidity', 'flame', 'uv', 'pressure']
+    for s in sensors:
+        if s in data.keys():
+            database[s].append(data[s])
+            sensorData.append(data[s])
+        else:
+            database[s].append(None)
+            sensorData.append(0)
+    enviaDadosThingSpeak(sensorData)
     return
 
 def enviaDadosThingSpeak(sensorData):
-        json = {'field1': sensorData[0],'field2': sensorData[1],'field3': sensorData[2],'field4': sensorData[3],'field5': sensorData[4], 'key':key }
+        flameVlr = 1 if sensorData[2] else 0
+        json = {'field1': sensorData[0],'field2': sensorData[1],'field3': flameVlr,'field4': sensorData[3],'field5': sensorData[4], 'key':key }
         print(json)
         params = urllib.parse.urlencode(json)
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
