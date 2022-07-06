@@ -26,7 +26,8 @@
 			"type_traits": "cpp",
 			"utility": "cpp",
 			"variant": "cpp",
-			"string_view": "cpp"
+			"string_view": "cpp",
+			"limits": "cpp"
 		}
 	}
 }

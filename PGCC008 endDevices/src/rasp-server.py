@@ -84,33 +84,35 @@ def send_setup_signal(data_in, connection):
     data["send"] = True
     data["type"] = 3
     data["t_send"] = 5
-    data = json.dumps(data)
-    print(data)
-    connection.write(data.encode('ascii'))
+    connection.write(json.dumps(data).encode('ascii'))
     connection.flush()
     time.sleep(0.5)
+    print(data)
 
     data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":5,"uvPinDef":0,"bmp280PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
-    connection.write(data.encode('ascii'))
+    connection.write(json.dumps(data).encode('ascii'))
     connection.flush()
     time.sleep(0.5)
+    print(data)
 
     data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":5,"dht11PinDef":3,"flamePinDef":15,"pinDef": [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
-    connection.write(data.encode('ascii'))
+    connection.write(json.dumps(data).encode('ascii'))
     connection.flush()
     time.sleep(0.5)
+    print(data)
 
     data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":5,"uvPinDef":0,"dht11PinDef":3,"flamePinDef":15,"pinDef": [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
-    connection.write(data.encode('ascii'))
+    connection.write(json.dumps(data).encode('ascii'))
     connection.flush()
     time.sleep(0.5)
+    print(data)
 
     data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":5,"uvPinDef":0,"bmp180PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
-    connection.write(data.encode('ascii'))
+    connection.write(json.dumps(data).encode('ascii'))
     connection.flush()
     time.sleep(0.5)
+    print(data)
 
-    # print(data)
     return pin_table
 
 def changeFrequency(id, frequence, connection):
@@ -121,16 +123,15 @@ def changeFrequency(id, frequence, connection):
     data["send_type"] = 2
     data["nodeDestiny"] = node_list[0] #como saber o id do node que eu quero enviar
     data["t_send"] = period
-
-    data=json.dumps(data)
     
-    connection.write(data.encode('ascii'))
+    connection.write(json.dumps(data).encode('ascii'))
     connection.flush()
 
     return
 
 def verifica_anomalia(data):
     r = False
+    chama = False
     if "flame" in data:
         chama = data["flame"]
         r = True
@@ -164,13 +165,13 @@ def verifica_anomalia(data):
         else: # nesse else a temperatura ja é maior que 35
             if temperatura > 45: 
                 if chama:
-                    print("Incêndio")
+                    #print("Incêndio")
                     database["calor"].append(0)
                     database["susp_incendio"].append(0)
                     database["incendio"].append(1)
                     database["prin_incendio"].append(0)
                 else:
-                    print("Suspeita de incêndio")
+                    #print("Suspeita de incêndio")
                     database["calor"].append(0)
                     database["susp_incendio"].append(1)
                     database["incendio"].append(0)
@@ -180,7 +181,7 @@ def verifica_anomalia(data):
                     database["prin_incendio"].append(1)
                 else: 
                     database["prin_incendio"].append(0) 
-                print("onda de calor")
+                #print("onda de calor")
                 database["calor"].append(1)
                 database["susp_incendio"].append(0)
                 database["incendio"].append(0)
@@ -188,21 +189,15 @@ def verifica_anomalia(data):
     return r
 
 def leitura_dados(data):
-    print('aqui')
     if "device" in data:
-        print('aqui1')
         database["id"].append(data["device"])
     if "timestamp" in data:
-        print('aqui2')
         database["timestamp"].append(data["timestamp"])
     if "latitude" in data:
-        print('aqui3')
         database["latitude"].append(data["latitude"])
     if "longitude" in data:
-        print('aqui4')
         database["longitude"].append(data["longitude"])
-    
-    print('aqui5')
+
     
     if(verifica_anomalia(data)):
         sensorData = []
@@ -214,13 +209,13 @@ def leitura_dados(data):
             else:
                 database[s].append(None)
                 sensorData.append(None)
-        print(database)
+        #print(database)
         enviaDadosThingSpeak(sensorData)
     return
 
 def enviaDadosThingSpeak(sensorData):
         json = {'field1': sensorData[0],'field2': sensorData[1],'field3': sensorData[2],'field4': sensorData[3],'field5': sensorData[4], 'key':key }
-        params = urllib.urlencode(json)
+        params = urllib.parse.urlencode(json)
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
         conn = http.client.HTTPConnection("api.thingspeak.com:80")
         try:
@@ -229,7 +224,8 @@ def enviaDadosThingSpeak(sensorData):
             print(response.status, response.reason)
             data = response.read()
             conn.close()
-        except:
+        except Exception as e: 
+            print(e)
             print("connection ThingSpeak failed\n")
 
 
@@ -244,14 +240,13 @@ connection.reset_input_buffer()
 while(True):
     if(connection.in_waiting > 0):
         msg = connection.readline()
-        print(msg.decode('Ascii'))
         try:
-            print('aqui0')
             print(msg)
             data = json.loads(msg)
             if "id_node" in  data.keys():
                 pin = send_setup_signal(data, connection)
             else:
                 leitura_dados(data)
-        except:
+        except Exception as e: 
+            print(e)
             print("JSON String inválida.....................")
