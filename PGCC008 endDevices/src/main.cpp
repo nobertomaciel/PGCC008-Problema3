@@ -642,8 +642,10 @@ void sendSerial(){
                 node++;
                 i++;
             }
-            firstMsg += "]}";
-            Serial.println(firstMsg);
+            int s = firstMsg.length();
+            String firstMsgCopy = firstMsg.substring(0,s-1);
+            firstMsgCopy += "]}";
+            Serial.println(firstMsgCopy);
             c = 0;
         }
         c += 1;
