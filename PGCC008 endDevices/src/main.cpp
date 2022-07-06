@@ -52,17 +52,17 @@
     #define   WIFI_HIDE         1
     #define   WIFI_CHANNEL      1
 
-// verificar
-// verificar
-// verificar
 // bmp280 config lib Adafruit_BMP280
-    #define BMP_SCK  (13) // verificar
-    #define BMP_MISO (12) // verificar
-    #define BMP_MOSI (11) // verificar
-    #define BMP_CS   (10) // verificar
-// verificar
-// verificar
-// verificar
+    #define BMP_SCK  (13)
+    #define BMP_MISO (12)
+    #define BMP_MOSI (11)
+    #define BMP_CS   (10)
+
+    boolean uvDefined = false;
+    boolean dht11Defined = false;
+    boolean bmp280Defined = false;
+    boolean bmp180Defined = false;
+    boolean flameDefined = false;
 
 
 // dht11 config lib SimpleDHT
@@ -232,6 +232,15 @@ void pinEnable(){
     }
 }
 
+//
+void unsetSensors(){
+    uvDefined = false;
+    dht11Defined = false;
+    bmp280Defined = false;
+    bmp180Defined = false;
+    flameDefined = false;
+}
+
 // reseta os dados enviados
 void resetJsonSensorKeysData(){
     if(sendJsonData.containsKey("seaLevelAltitude")){
@@ -297,6 +306,20 @@ bool getParameters(String toGet){
             T_send = receivedJsonData["t_send"];
             sendTimeAdjust();
         }
+        if(receivedJsonData.containsKey("unsetSensors")){
+            if(receivedJsonData["unsetSensors"] == true){
+                uvDefined = false;
+                dht11Defined = false;
+                bmp280Defined = false;
+                bmp180Defined = false;
+                flameDefined = false;
+                resetJsonSensorKeysData();
+                Serial.println("All sensors definitions clear on this node....................");
+            }
+            else{
+                Serial.println("Nothing has changed on this node....................");
+            }
+        }
         if(receivedJsonData.containsKey("pinDef")){
             if(nodeDestiny == nodeOrigin){
                 for(int i=0;i<PINS_NUM;++i){
@@ -311,30 +334,35 @@ bool getParameters(String toGet){
         }
         if(receivedJsonData.containsKey("uvPinDef")){
             uvPinDef = receivedJsonData["uvPinDef"];
+            uvDefined = true;
         }
         if(receivedJsonData.containsKey("uvMeasure")){
             uvMeasure = receivedJsonData["uvMeasure"];
         }
         if(receivedJsonData.containsKey("dht11PinDef")){
             dht11PinDef = receivedJsonData["dht11PinDef"];
+            dht11Defined = true;
         }
         if(receivedJsonData.containsKey("dht11Measure")){
             dht11Measure = receivedJsonData["dht11Measure"];
         }
         if(receivedJsonData.containsKey("bmp280PinDef")){
             bmp280PinDef = receivedJsonData["bmp280PinDef"];
+            bmp280Defined = true;
         }
         if(receivedJsonData.containsKey("bmp280Measure")){
             bmp280Measure = receivedJsonData["bmp280Measure"];
         }
         if(receivedJsonData.containsKey("bmp180PinDef")){
             bmp180PinDef = receivedJsonData["bmp180PinDef"];
+            bmp180Defined = true;
         }
         if(receivedJsonData.containsKey("bmp180Measure")){
             bmp180Measure = receivedJsonData["bmp180Measure"];
         }
         if(receivedJsonData.containsKey("flamePinDef")){
             flamePinDef = receivedJsonData["flamePinDef"];
+            flameDefined = true;
         }
         if(receivedJsonData.containsKey("flameMeasure")){
             flameMeasure = receivedJsonData["flameMeasure"];
@@ -343,7 +371,7 @@ bool getParameters(String toGet){
             uint32_t node_master = receivedJsonData["node_master"];
             NODE_MASTER = node_master;
         }
-        Serial.println("Parameters changed in this node....................");
+        Serial.println("Parameters changed on this node....................");
         if(sendType==3){
             return false;
         }
@@ -352,7 +380,7 @@ bool getParameters(String toGet){
         }
     }
     else{
-        Serial.println("Parameters don't changed in this node..............");
+        Serial.println("Parameters don't changed on this node..............");
         return false;
     }
 }
@@ -506,13 +534,19 @@ float readBmp180(int measure = 4){
 
 // read flame sensor trigger
 bool readFlame(int pin){
-    bool flame = digitalRead(pin);
-    if(flame){
-        // se detectou chama, envie mensagem imediatamente
-        sendJsonData["flame"] = true;
-        sendMessage();
+    pinMode(pin, INPUT);
+    if(flameMeasure == 1){
+        float flameIndex = analogRead(0);
+        sendJsonData["flameIndex"] = flameIndex;
     }
-    return flame;
+    bool flame = digitalRead(pin);
+    sendJsonData["flame"] = !flame;
+    if(!flame){
+        // se detectou chama, envie mensagem imediatamente
+        //sendMessage();
+        Serial.println("ALERT: flame detected!!!");
+    }
+    return !flame;
 }
 
 // Leitura de todos os sensores
@@ -520,21 +554,20 @@ void readSensors(){
     for(int i = 0;i < PINS_NUM-1;++i){
       if(pinDef[i].pinSet == true){
             uint8_t pin = pinDef[i].pinNum;
-            if(i == uvPinDef){
-                pinData[i] = readUv(pin,uvMeasure);
+            if(i == uvPinDef && uvDefined == true){
+                pinData[i] = readUv(i,uvMeasure);
             }
-            else if(i == dht11PinDef){
+            else if(i == dht11PinDef && dht11Defined == true){
                 pinData[i] = readDht11(dht11Measure);
             }
-            else if(i == bmp280PinDef){
+            else if(i == bmp280PinDef && bmp280Defined == true){
                 pinData[i] = readBmp280(bmp280Measure);
             }
-            else if(i == bmp180PinDef){
+            else if(i == bmp180PinDef && bmp180Defined == true){
                 pinData[i] = readBmp180(bmp180Measure);
             }
-            else if(i == flamePinDef){
-                pinMode(pin, INPUT_PULLUP);
-                pinData[i] = readFlame(pin);
+            else if(i == flamePinDef && flameDefined == true){
+                pinData[i] = readFlame(i);
             }
             else{
                 pinData[i] = digitalRead(pin);

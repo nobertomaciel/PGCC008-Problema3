@@ -1,0 +1,15 @@
+node: all
+{"node_master":4208793911,"send": true,"type":3,"t_send":20}
+{"node_master":4208793911,"send": true,"type":3,"unsetSensors":true,"t_send":1}
+
+node: 4208793911 (uv, bmp280)
+{"nodeDestiny":4208793911,"send": true,"type":2,"t_send":5,"uvMeasure":4,"bmp280Measure":4,"uvPinDef":0,"bmp280PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
+
+node: 4208803281 (flame,dht11)
+{"nodeDestiny":4208803281,"send": true,"type":2,"t_send":5,"flameMeasure":4,"dht11Measure":4,"dht11PinDef":3,"flamePinDef":15,"pinDef": [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
+
+node: 4208790561 (uv,flame,dht11)
+{"nodeDestiny":4208790561,"send": true,"type":2,"t_send":5,"uvMeasure":4,"flameMeasure":4,"dht11Measure":4,"uvPinDef":0,"dht11PinDef":3,"flamePinDef":15,"pinDef": [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
+
+node: 4208779354 (uv,flame,dht11)
+{"nodeDestiny":4208779354,"send": true,"type":2,"t_send":5,"uvMeasure":4,"bmp180Measure":4,"uvPinDef":0,"bmp180PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
