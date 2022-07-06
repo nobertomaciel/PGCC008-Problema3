@@ -7,6 +7,8 @@ import http.client
 import urllib
 import time
 
+from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTClient
+
 import time
 from datetime import datetime
 
@@ -103,16 +105,6 @@ def send_setup_signal(data_in, connection):
 
     return pin_table
 
-
-def changeFrequency(id, period = t_send):
-    data = {}
-    data["send"] = True
-    data["send_type"] = 2
-    data["nodeDestiny"] = id
-    data["t_send"] = period
-    writeSerial(data)
-
-    return
 
 def verifica_anomalia(data):
     r = False
@@ -214,6 +206,85 @@ def enviaDadosThingSpeak(sensorData):
         except Exception as e:
             print("connection ThingSpeak failed...................: ",e)
 
+def getNodeSensorValue(node, sensor):
+    if node == 1:
+        data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":1}
+        data2 = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":t_send}
+    elif node == 2:
+        data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":1}
+        data2 = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":t_send}
+    elif node == 3:
+        data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":1}
+        data2 = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":t_send}
+    else:
+        data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":1}
+        data2 = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":t_send}
+    print("data: {}".format(data))
+    writeSerial(data)
+    time.sleep(1)
+    msg = connection.readline()
+    if sensor in msg.keys():
+        sensor_value = msg[sensor]
+        payload_msg =  { "state": {"desired":{"returned_sensor":"{}".format(sensor), "returned_value":"{}".format(sensor_value), "returned_node":"{}".format(node)}}}
+        print(payload_msg)
+        JSON_payload = json.dumps(payload_msg)
+        client_publish.publish(topic="$aws/things/RaspberryPi/shadow/update", QoS = 1, payload=JSON_payload)
+    else:
+        print("Esse node não possui esse sensor")
+    
+    print("data2: {}".format(data2))
+    writeSerial(data2)
+    
+    print("Será retornado o valor do sensor de {} do nó {}".format(sensor, node))
+
+def alterarFrequencia(value, node):
+    n = node_list[int(node)-1]
+    data = {"nodeDestiny":n,"send": True,"type":2,"t_send":value}
+    writeSerial(data)
+    print(data)
+    print("A frequencia foi alterada para {}".format(value))
+
+def helloworld(self, params, packet):
+
+    p = json.loads(packet.payload)
+    keys = p['state']['desired'].keys()
+    if "frequencia" in keys:
+        value = p['state']['desired']["frequencia"]
+        node = p['state']['desired']["node"]
+        alterarFrequencia(value, node)
+    elif "get_sensor" in keys:
+        sensor = p['state']['desired']["get_sensor"]
+        node = p['state']['desired']["node"]
+        getNodeSensorValue(node, sensor)
+
+
+# Conexão com o broker aws
+myMQTTClient = AWSIoTMQTTClient("CoelhoClientID") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
+myMQTTClient.configureEndpoint("a3i855sumk6d1s-ats.iot.us-east-1.amazonaws.com", 8883)
+
+myMQTTClient.configureCredentials("/home/pi/AWSIoT/root-ca.pem", "/home/pi/AWSIoT/private.pem.key", "/home/pi/AWSIoT/certificate.pem.crt")
+
+myMQTTClient.configureOfflinePublishQueueing(-1) # Infinite offline Publish queueing
+myMQTTClient.configureDrainingFrequency(2) # Draining: 2 Hz
+myMQTTClient.configureConnectDisconnectTimeout(10) # 10 sec
+myMQTTClient.configureMQTTOperationTimeout(5) # 5 sec
+print ('Initiating')
+
+myMQTTClient.connect()
+myMQTTClient.subscribe("$aws/things/RaspberryPi/shadow/update", 1, helloworld)
+
+#########
+
+client_publish = AWSIoTMQTTClient("publisherCoelho") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
+client_publish.configureEndpoint("a3i855sumk6d1s-ats.iot.us-east-1.amazonaws.com", 8883)
+
+client_publish.configureCredentials("/home/pi/AWSIoT/root-ca.pem", "/home/pi/AWSIoT/private.pem.key", "/home/pi/AWSIoT/certificate.pem.crt")
+
+client_publish.configureOfflinePublishQueueing(-1) # Infinite offline Publish queueing
+client_publish.configureDrainingFrequency(2) # Draining: 2 Hz
+client_publish.configureConnectDisconnectTimeout(10) # 10 sec
+client_publish.configureMQTTOperationTimeout(5) # 5 sec
+client_publish.connect()
 
 # Dicionário de dados contendo todas as informações recebidas pelo Rasp, desde os valores dos sensores (None caso não estejam presentes no pacote),
 # até a indnicação de ocorrência ou não de anomalias como incendios, alta radiação, onda de calor, entre outros
