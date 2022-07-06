@@ -193,12 +193,13 @@ def leitura_dados(data):
                 sensorData.append(data[s])
             else:
                 database[s].append(None)
-                sensorData.append(None)
+                sensorData.append(0)
         enviaDadosThingSpeak(sensorData)
     return
 
 def enviaDadosThingSpeak(sensorData):
         json = {'field1': sensorData[0],'field2': sensorData[1],'field3': sensorData[2],'field4': sensorData[3],'field5': sensorData[4], 'key':key }
+        print(json)
         params = urllib.parse.urlencode(json)
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
         conn = http.client.HTTPConnection("api.thingspeak.com:80")
