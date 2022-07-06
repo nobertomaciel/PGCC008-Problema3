@@ -18,9 +18,16 @@ pin_bmp280 = 5
 pin_uv = 0
 pin_chama = 1
 
+t_send = 5
+
 n_nodes = 4
 node_list = [4208803281, 4208793911, 4208790561, 4208779354]
 
+def writeSerial(data):
+    connection.write(json.dumps(data).encode('ascii'))
+    connection.flush()
+    time.sleep(0.5)
+    print(data)
 
 # Recebe a lista de nós de entrada e atribui para cada um deles quais pinos serão e quais não deve ser ativados
 def define_pinTable():
@@ -79,53 +86,31 @@ def send_setup_signal(data_in, connection):
 
     pin_table = define_pinTable()
 
-    data = {}
-    data["node_master"] = data_in["id_node"]
-    data["send"] = True
-    data["type"] = 3
-    data["t_send"] = 5
-    connection.write(json.dumps(data).encode('ascii'))
-    connection.flush()
-    time.sleep(0.5)
-    print(data)
+    data = {"node_master":data_in["id_node"],"send": True,"type":3,"t_send":t_send,"timestamp":timestamp}
+    writeSerial(data)
 
-    data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":5,"uvPinDef":0,"bmp280PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
-    connection.write(json.dumps(data).encode('ascii'))
-    connection.flush()
-    time.sleep(0.5)
-    print(data)
+    data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":t_send,"uvPinDef":0,"bmp280PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
+    writeSerial(data)
 
-    data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":5,"dht11PinDef":3,"flamePinDef":15,"pinDef": [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
-    connection.write(json.dumps(data).encode('ascii'))
-    connection.flush()
-    time.sleep(0.5)
-    print(data)
+    data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":t_send,"dht11PinDef":3,"flamePinDef":15,"pinDef": [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
+    writeSerial(data)
 
-    data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":5,"uvPinDef":0,"dht11PinDef":3,"flamePinDef":15,"pinDef": [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
-    connection.write(json.dumps(data).encode('ascii'))
-    connection.flush()
-    time.sleep(0.5)
-    print(data)
+    data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":t_send,"uvPinDef":0,"dht11PinDef":3,"flamePinDef":15,"pinDef": [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
+    writeSerial(data)
 
-    data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":5,"uvPinDef":0,"bmp180PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
-    connection.write(json.dumps(data).encode('ascii'))
-    connection.flush()
-    time.sleep(0.5)
-    print(data)
+    data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":t_send,"uvPinDef":0,"bmp180PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
+    writeSerial(data)
 
     return pin_table
 
-def changeFrequency(id, frequence, connection):
-    period = 5 # período para que os sensores enviem os dados, em segundos
+
+def changeFrequency(id, period = t_send):
     data = {}
-    data["node_master"] = "id"
     data["send"] = True
     data["send_type"] = 2
-    data["nodeDestiny"] = node_list[0] #como saber o id do node que eu quero enviar
+    data["nodeDestiny"] = id
     data["t_send"] = period
-    
-    connection.write(json.dumps(data).encode('ascii'))
-    connection.flush()
+    writeSerial(data)
 
     return
 
@@ -209,7 +194,6 @@ def leitura_dados(data):
             else:
                 database[s].append(None)
                 sensorData.append(None)
-        #print(database)
         enviaDadosThingSpeak(sensorData)
     return
 
@@ -224,9 +208,8 @@ def enviaDadosThingSpeak(sensorData):
             print(response.status, response.reason)
             data = response.read()
             conn.close()
-        except Exception as e: 
-            print(e)
-            print("connection ThingSpeak failed\n")
+        except Exception as e:
+            print("connection ThingSpeak failed...................: ",e)
 
 
 # Dicionário de dados contendo todas as informações recebidas pelo Rasp, desde os valores dos sensores (None caso não estejam presentes no pacote),
@@ -247,6 +230,5 @@ while(True):
                 pin = send_setup_signal(data, connection)
             else:
                 leitura_dados(data)
-        except Exception as e: 
-            print(e)
-            print("JSON String inválida.....................")
+        except Exception as e:
+            print("JSON String inválida.....................: ",e)
