@@ -193,7 +193,6 @@ def leitura_dados(data):
 def enviaDadosThingSpeak(sensorData):
         flameVlr = 1 if sensorData[2] else 0
         json = {'field1': sensorData[0],'field2': sensorData[1],'field3': flameVlr,'field4': sensorData[3],'field5': sensorData[4], 'key':key }
-        print(json)
         params = urllib.parse.urlencode(json)
         headers = {"Content-typZZe": "application/x-www-form-urlencoded","Accept": "text/plain"}
         conn = http.client.HTTPConnection("api.thingspeak.com:80")
@@ -222,6 +221,13 @@ def getNodeSensorValue(node, sensor):
     print("data: {}".format(data))
     writeSerial(data)
     time.sleep(1)
+    while(True):
+        try:
+            data = connection.readline()
+            msg = json.loads(data)
+            break
+        except Exception as e:
+            print("JSON String inválida.....................: ",e)
     msg = connection.readline()
     if sensor in msg.keys():
         sensor_value = msg[sensor]
@@ -239,7 +245,7 @@ def getNodeSensorValue(node, sensor):
 
 def alterarFrequencia(value, node):
     n = node_list[int(node)-1]
-    data = {"nodeDestiny":n,"send": True,"type":2,"t_send":value}
+    data = {"nodeDestiny":n,"send": True,"type":2,"t_send":int(va
     writeSerial(data)
     print(data)
     print("A frequencia foi alterada para {}".format(value))
@@ -262,8 +268,7 @@ def helloworld(self, params, packet):
 myMQTTClient = AWSIoTMQTTClient("CoelhoClientID") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
 myMQTTClient.configureEndpoint("a3i855sumk6d1s-ats.iot.us-east-1.amazonaws.com", 8883)
 
-myMQTTClient.configureCredentials("/home/pi/AWSIoT/root-ca.pem", "/home/pi/AWSIoT/private.pem.key", "/home/pi/AWSIoT/certificate.pem.crt")
-
+myMQTTClient.configureCredentials("root-ca.pem", "private.pem.key", "certificate.pem.crt")
 myMQTTClient.configureOfflinePublishQueueing(-1) # Infinite offline Publish queueing
 myMQTTClient.configureDrainingFrequency(2) # Draining: 2 Hz
 myMQTTClient.configureConnectDisconnectTimeout(10) # 10 sec
@@ -273,13 +278,11 @@ print ('Initiating')
 myMQTTClient.connect()
 myMQTTClient.subscribe("$aws/things/RaspberryPi/shadow/update", 1, helloworld)
 
-#########
 
 client_publish = AWSIoTMQTTClient("publisherCoelho") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
 client_publish.configureEndpoint("a3i855sumk6d1s-ats.iot.us-east-1.amazonaws.com", 8883)
 
-client_publish.configureCredentials("/home/pi/AWSIoT/root-ca.pem", "/home/pi/AWSIoT/private.pem.key", "/home/pi/AWSIoT/certificate.pem.crt")
-
+client_publish.configureCredentials("root-ca.pem", "private.pem.key", "certificate.pem.crt")
 client_publish.configureOfflinePublishQueueing(-1) # Infinite offline Publish queueing
 client_publish.configureDrainingFrequency(2) # Draining: 2 Hz
 client_publish.configureConnectDisconnectTimeout(10) # 10 sec
@@ -296,6 +299,7 @@ connection.reset_input_buffer()
 
 while(True):
     if(connection.in_waiting > 0):
+        time.sleep(1)
         msg = connection.readline()
         try:
             print(msg)
