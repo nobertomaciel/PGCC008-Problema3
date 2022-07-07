@@ -158,7 +158,7 @@ def verifica_anomalia(data):
                     database["prin_incendio"].append(1)
                 else: 
                     database["prin_incendio"].append(0) 
-                #print("onda de calor")
+                #pr(("onda de calor")
                 database["calor"].append(1)
                 database["susp_incendio"].append(0)
                 database["incendio"].append(0)
@@ -228,7 +228,7 @@ def getNodeSensorValue(node, sensor):
             break
         except Exception as e:
             print("JSON String inválida.....................: ",e)
-    msg = connection.readline()
+    #msg = connection.readline()
     if sensor in msg.keys():
         sensor_value = msg[sensor]
         payload_msg =  { "state": {"desired":{"returned_sensor":"{}".format(sensor), "returned_value":"{}".format(sensor_value), "returned_node":"{}".format(node)}}}
@@ -245,7 +245,7 @@ def getNodeSensorValue(node, sensor):
 
 def alterarFrequencia(value, node):
     n = node_list[int(node)-1]
-    data = {"nodeDestiny":n,"send": True,"type":2,"t_send":int(va
+    data = {"nodeDestiny":n,"send": True,"type":2,"t_send":int(value)}
     writeSerial(data)
     print(data)
     print("A frequencia foi alterada para {}".format(value))
