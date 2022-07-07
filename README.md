@@ -21,6 +21,13 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
    <img width="960px" src="https://github.com/nobertomaciel/PGCC008-Problema3/blob/main/diagrams/PGCC008_Atividade-3_Diagrams-diagrama%20f%C3%ADsico.drawio.png">
 </p>
 
+### Resultados das leituras
+<ol>
+   <li>
+      <a href="https://thingspeak.com/channels/1693709">https://thingspeak.com/channels/1693709</a>
+   </li>
+</ol>
+
 
 ## NodeMCU ESP8266 v3:
 ### Códigos
