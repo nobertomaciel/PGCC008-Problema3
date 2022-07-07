@@ -241,6 +241,11 @@ void unsetSensors(){
     flameDefined = false;
 }
 
+// reinicia o node
+void restartNode(){
+    ESP.restart();
+}
+
 // reseta os dados enviados
 void resetJsonSensorKeysData(){
     if(sendJsonData.containsKey("seaLevelAltitude")){
@@ -305,6 +310,11 @@ bool getParameters(String toGet){
         if(receivedJsonData.containsKey("t_send")){
             T_send = receivedJsonData["t_send"];
             sendTimeAdjust();
+        }
+        if(receivedJsonData.containsKey("restart")){
+            if(receivedJsonData["restart"] == true){
+                restartNode();
+            }
         }
         if(receivedJsonData.containsKey("unsetSensors")){
             if(receivedJsonData["unsetSensors"] == true){
@@ -675,8 +685,10 @@ void sendSerial(){
                 node++;
                 i++;
             }
-            firstMsg += "]}";
-            Serial.println(firstMsg);
+            int s = firstMsg.length();
+            String firstMsgCopy = firstMsg.substring(0,s-1);
+            firstMsgCopy += "]}";
+            Serial.println(firstMsgCopy);
             c = 0;
         }
         c += 1;
