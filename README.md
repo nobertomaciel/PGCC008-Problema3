@@ -22,11 +22,11 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
 </p>
 
 ### Resultados das leituras
-<ol>
+<ul>
    <li>
       <a href="https://thingspeak.com/channels/1693709">https://thingspeak.com/channels/1693709</a>
    </li>
-</ol>
+</ul>
 
 
 ## NodeMCU ESP8266 v3:
