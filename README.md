@@ -69,6 +69,16 @@ Este projeto faz parte da atividade final da disciplina PGCC008 do Programa de P
    </li>
 </ol>
 
+### Comunicação MQTT
+
+O Raspberry cadastrado no site da AWS possui um canal de comunicação MQTT denominado shadow, e foi a partir desse canal que foi realizada a troca de mensagem entre o broker AWS e o raspberry.
+
+Um cliente MQTT é responsável por verificar se o canal 'update' do shadow sofreu alterações, em caso positivo é acionado o método que deve realizar o processamento a partir da mensagem recebida. Se a mensagem for para alterar a frequência de um nó, os valores serão obtidos do json e uma mensagem será montada e enviada, seguindo o protocolo vigente, para que o node em questão tenha sua frequência alterada.
+
+Caso o objetivo seja obter o valor do sensor de um determinado node, então são realizados alguns processos a mais. Primeiro uma mensagem é enviada para que a frequência da mensagem seja igual a 1, dessa forma o node envia seus dados imediatamente. Feito isso, os dados são lidos e enviados de volta para o broker AWS. Logo em seguida, é enviada outra mensagem para o nó que retornou o valor para que ele volta a sua frequêncai de operação original.
+
+
+
 ### Sites
 <ol>
    <li>
