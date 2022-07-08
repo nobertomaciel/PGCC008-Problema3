@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import socket
 import pickle
 import numpy as np
@@ -28,7 +29,7 @@ node_list = [4208803281, 4208793911, 4208790561, 4208779354]
 def writeSerial(data):
     connection.write(json.dumps(data).encode('ascii'))
     connection.flush()
-    time.sleep(0.5)
+    time.sleep(2)
     print(data)
 
 # Recebe a lista de nós de entrada e atribui para cada um deles quais pinos serão e quais não deve ser ativados
@@ -90,18 +91,23 @@ def send_setup_signal(data_in, connection):
 
     data = {"node_master":data_in["id_node"],"send": True,"type":3,"t_send":t_send,"timestamp":timestamp}
     writeSerial(data)
+    time.sleep(10)
 
     data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":t_send,"uvPinDef":0,"bmp280PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
     writeSerial(data)
+    time.sleep(10)
 
     data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":t_send,"dht11PinDef":3,"flamePinDef":15,"pinDef": [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
     writeSerial(data)
+    time.sleep(10)
 
     data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":t_send,"uvPinDef":0,"dht11PinDef":3,"flamePinDef":15,"pinDef": [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
     writeSerial(data)
+    time.sleep(10)
 
     data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":t_send,"uvPinDef":0,"bmp180PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
     writeSerial(data)
+    time.sleep(10)
 
     return pin_table
 
@@ -207,20 +213,20 @@ def enviaDadosThingSpeak(sensorData):
 
 def getNodeSensorValue(node, sensor):
     if node == 1:
-        data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":1}
+        data = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":1,"dht11PinDef":3,"flamePinDef":15,"pinDef": [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
         data2 = {"nodeDestiny":4208803281,"send": True,"type":2,"t_send":t_send}
     elif node == 2:
-        data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":1}
+        data = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":1,"uvPinDef":0,"bmp280PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
         data2 = {"nodeDestiny":4208793911,"send": True,"type":2,"t_send":t_send}
     elif node == 3:
-        data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":1}
+        data = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":1,"uvPinDef":0,"dht11PinDef":3,"flamePinDef":15,"pinDef": [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0]}
         data2 = {"nodeDestiny":4208790561,"send": True,"type":2,"t_send":t_send}
     else:
-        data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":1}
+        data = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":1,"uvPinDef":0,"bmp180PinDef":6,"pinDef": [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}
         data2 = {"nodeDestiny":4208779354,"send": True,"type":2,"t_send":t_send}
     print("data: {}".format(data))
     writeSerial(data)
-    time.sleep(1)
+    time.sleep(2)
     while(True):
         try:
             data = connection.readline()
@@ -250,8 +256,7 @@ def alterarFrequencia(value, node):
     print(data)
     print("A frequencia foi alterada para {}".format(value))
 
-def helloworld(self, params, packet):
-
+def receiveMqtt(self, params, packet):
     p = json.loads(packet.payload)
     keys = p['state']['desired'].keys()
     if "frequencia" in keys:
@@ -276,7 +281,7 @@ myMQTTClient.configureMQTTOperationTimeout(5) # 5 sec
 print ('Initiating')
 
 myMQTTClient.connect()
-myMQTTClient.subscribe("$aws/things/RaspberryPi/shadow/update", 1, helloworld)
+myMQTTClient.subscribe("$aws/things/RaspberryPi/shadow/update", 1, receiveMqtt)
 
 
 client_publish = AWSIoTMQTTClient("publisherCoelho") #random key, if another connection using the same key is opened the previous one is auto closed by AWS IOT
